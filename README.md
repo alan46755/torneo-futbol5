@@ -2,7 +2,9 @@
 
 Sistema de gestión del Torneo Interfacultades de Fútbol 5 (Base de Datos 1, Obligatorio 2.º semestre 2026).
 
-- **Backend:** Python 3.10+ con Flask, sin ORM (SQL escrito a mano con `mysql-connector-python` y consultas parametrizadas).
+**Integrantes:** Alan Coelho · José Carlos García
+
+- **Backend:** Python 3.10+ con Flask, sin ORM: consultas SQL explícitas y parametrizadas con `mysql-connector-python`.
 - **Base de datos:** MySQL 8.0, con las reglas de negocio implementadas en la propia base (CHECK, claves foráneas compuestas, triggers, procedimientos y vistas).
 - **Frontend:** plantillas HTML (Jinja2) servidas por Flask, con CSS y JavaScript propios (sin frameworks).
 - **Seguridad:** tres usuarios de base de datos con permisos diferenciados (autenticación, administrador y planillero), contraseñas hasheadas (PBKDF2), protección CSRF y validación en las tres capas.
@@ -167,3 +169,9 @@ Los datos de prueba se generan **relativos a la fecha en que se ejecuta el scrip
 - **Puerto 5000 ocupado en macOS** (AirPlay): ejecutar `flask --app app run --port 5050` o usar Docker (puerto 8000).
 - **Horarios corridos**: la aplicación fija la zona horaria de la sesión de MySQL en `-03:00` (`DB_TIME_ZONE`), por lo que las reglas de "turno ya pasó" y "48 horas" usan la hora de Uruguay aunque el servidor esté en UTC.
 - **Volver a los datos iniciales**: ejecutar nuevamente `script_completo.sql` (o `docker compose down -v && docker compose up`).
+
+---
+
+## 8. Uso de herramientas de IA
+
+Para el desarrollo se utilizó Claude (Anthropic) como asistente: diseño del modelo, generación del código, de los scripts SQL y de la documentación. El equipo ejecutó y probó el sistema, revisó el código, detectó y corrigió problemas y tomó las decisiones finales. El detalle está en el informe.
