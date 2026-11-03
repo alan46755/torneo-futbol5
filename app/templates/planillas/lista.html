@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado %}
+{% block titulo %}Planillas{% endblock %}
+{% block contenido %}
+<h1>Planillas de juego {% if torneo %}<small>· {{ torneo.nombre }}</small>{% endif %}</h1>
+<p class="sub">La planilla se carga una vez comenzado el partido. Un partido jugado puede corregirse hasta 48 horas después de disputado.</p>
+<table>
+  <thead><tr><th>Fecha</th><th>Día y turno</th><th>Partido</th><th>Estado</th><th>Situación</th><th></th></tr></thead>
+  <tbody>
+  {% for p in filas %}
+    {% set pendiente = p.estado == 'programado' and p.comenzo %}
+    <tr class="{{ 'destacada' if pendiente }}">
+      <td>{{ p.numero_fecha }}</td>
+      <td>{{ p.dia|fecha }} · {{ p.hora_inicio|hora }}</td>
+      <td>{{ p.local }} <b>{% if p.estado == 'jugado' %}{{ p.goles_local }} - {{ p.goles_visitante }}{% else %}vs{% endif %}</b> {{ p.visitante }}</td>
+      <td>{{ estado(p.estado) }}</td>
+      <td>
+        {% if pendiente %}<span class="alerta">Pendiente de planilla</span>
+        {% elif p.estado == 'jugado' and p.en_ventana %}Corregible (48 h)
+        {% elif p.estado == 'jugado' %}Cerrado
+        {% else %}Aún no comenzó{% endif %}
+      </td>
+      <td class="acciones"><a href="{{ url_for('planillas.detalle', id_partido=p.id_partido) }}">{{ 'Cargar' if pendiente else 'Ver' }}</a></td>
+    </tr>
+  {% else %}<tr><td colspan="6" class="vacio">No hay partidos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

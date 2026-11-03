@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, csrf %}
+{% block titulo %}Sanción disciplinaria{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nueva sanción disciplinaria' if nuevo else 'Editar sanción disciplinaria' }}</h1>
+<form method="post" class="tarjeta formulario">
+  {{ csrf() }}
+  {% if nuevo %}
+    <label class="campo"><span>Jugador</span>
+      <select name="ci_jugador" required><option value="">Seleccione...</option>
+        {% for j in jugadores %}<option value="{{ j.ci }}" {% if j.ci == s.ci_jugador %}selected{% endif %}>{{ j.equipo }} · {{ j.apellido }}, {{ j.nombre }}</option>{% endfor %}
+      </select></label>
+  {% else %}
+    <p><b>Jugador:</b> {{ s.apellido }}, {{ s.nombre }} ({{ s.equipo }})</p>
+  {% endif %}
+  <div class="fila">
+    {{ campo('numero_fecha_inicio', 'Desde la fecha N°', s, 'number', 'required min="1" max="51"') }}
+    {{ campo('cantidad_fechas', 'Cantidad de fechas', s, 'number', 'required min="1" max="20"') }}
+  </div>
+  <label class="campo"><span>Detalle / motivo</span>
+    <textarea name="observaciones" required minlength="5" maxlength="255" rows="3">{{ s.observaciones or '' }}</textarea></label>
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('sanciones.lista') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, selector, csrf %}
+{% block titulo %}{{ 'Nuevo jugador' if nuevo else 'Editar jugador' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nuevo jugador' if nuevo else 'Editar jugador' }}</h1>
+<form method="post" class="tarjeta formulario">
+  {{ csrf() }}
+  {% if nuevo %}
+    {{ campo('ci', 'Cédula de identidad', j, attrs='required data-ci maxlength="11" placeholder="1.234.567-2"',
+             ayuda='Con o sin puntos y guion; se controla el dígito verificador.') }}
+  {% else %}
+    <p><b>CI:</b> {{ j.ci }} <small>(la cédula no se puede modificar)</small></p>
+  {% endif %}
+  <div class="fila">
+    {{ campo('nombre', 'Nombre', j, attrs='required minlength="2" maxlength="50" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\' \\-]+" title="Solo letras, espacios y guiones"') }}
+    {{ campo('apellido', 'Apellido', j, attrs='required minlength="2" maxlength="50" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\' \\-]+" title="Solo letras, espacios y guiones"') }}
+  </div>
+  {{ campo('email', 'Email', j, 'email', 'required maxlength="100"') }}
+  <div class="fila">
+    {{ campo('fecha_nacimiento', 'Fecha de nacimiento', j, 'date', 'required data-edad-min="16" max="' ~ hoy().isoformat() ~ '"') }}
+    {{ selector('tipo', 'Tipo', tipos, j, attrs='required') }}
+  </div>
+  {{ selector('id_facultad', 'Facultad', facultades, j, 'id_facultad', 'nombre', 'required') }}
+  <p class="nota">Docentes y funcionarios pueden integrar equipos, con un máximo de 2 por plantel.</p>
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('jugadores.lista') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}
+<h1>Reportes {% if torneo %}<small>· {{ torneo.nombre }}</small>{% endif %}</h1>
+<nav class="indice">
+  {% for r in reportes %}<a href="#{{ r.id }}">{{ r.titulo }}</a>{% endfor %}
+</nav>
+{% for r in reportes %}
+<section class="tarjeta reporte" id="{{ r.id }}">
+  <h2>{{ r.titulo }}</h2>
+  <p class="sub">{{ r.descripcion }}</p>
+  {% if r.filas %}
+  <table>
+    <thead><tr>{% for c, et in r.columnas %}<th>{{ et }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for f in r.filas %}
+      <tr class="{{ 'total' if (f.facultad == 'TOTAL' or f.fecha == 'Toda la edición') }}">
+        {% for c, et in r.columnas %}
+          <td>{% if c in r.get('etiquetar', []) or c in ('tipo', 'superficie') %}{{ f[c]|etiqueta }}{% else %}{{ f[c] if f[c] is not none else '—' }}{% endif %}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="vacio">Sin datos para esta edición.</p>{% endif %}
+  <details><summary>Ver consulta SQL</summary><pre>{{ r.sql_mostrar }}</pre></details>
+</section>
+{% endfor %}
+{% endblock %}

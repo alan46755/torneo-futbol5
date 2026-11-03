@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post, csrf, estado %}
+{% block titulo %}Partidos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Fixture {% if torneo %}<small>· {{ torneo.nombre }}</small>{% endif %}</h1>
+  {% if torneo and torneo.estado != 'finalizado' %}
+    <a class="boton primario" href="{{ url_for('partidos.nuevo') }}">+ Programar partido</a>
+  {% endif %}
+</div>
+
+{% if torneo and not filas and not filtro.fecha and not filtro.estado and torneo.estado != 'finalizado' %}
+<section class="tarjeta">
+  <h2>Generar fixture automáticamente</h2>
+  <p>Arma todas las fechas del formato liga a una rueda (todos contra todos) y reparte los partidos en las canchas y turnos disponibles.
+     Cada partido se crea con las mismas validaciones que uno cargado a mano.</p>
+  <form method="post" action="{{ url_for('partidos.generar') }}" class="formulario fila">
+    {{ csrf() }}
+    <label class="campo"><span>Día de la fecha 1</span>
+      <input type="date" name="desde" required min="{{ [torneo.fecha_inicio, hoy()]|max }}" max="{{ torneo.fecha_fin }}"></label>
+    <label class="campo"><span>Días entre fechas</span>
+      <input type="number" name="dias_entre_fechas" value="7" min="1" max="30" required class="numero"></label>
+    <button class="primario">Generar fixture</button>
+  </form>
+</section>
+{% endif %}
+
+<form method="get" class="filtros">
+  <select name="fecha"><option value="">Todas las fechas</option>
+    {% for f in fechas %}<option value="{{ f }}" {% if f == filtro.fecha %}selected{% endif %}>Fecha {{ f }}</option>{% endfor %}
+  </select>
+  <select name="estado"><option value="">Todos los estados</option>
+    {% for e in ['programado', 'jugado', 'postergado', 'cancelado'] %}<option value="{{ e }}" {% if e == filtro.estado %}selected{% endif %}>{{ e|etiqueta }}</option>{% endfor %}
+  </select>
+  <button class="secundario">Filtrar</button>
+</form>
+
+<table>
+  <thead><tr><th>Fecha</th><th>Día y turno</th><th>Local</th><th class="centro">Resultado</th><th>Visitante</th><th>Cancha</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for p in filas %}
+    <tr>
+      <td>{{ p.numero_fecha }}</td>
+      <td>{{ p.dia|fecha }} · {{ p.hora_inicio|hora }}</td>
+      <td class="derecha">{{ p.local }}</td>
+      <td class="centro marcador">{% if p.estado == 'jugado' %}{{ p.goles_local }} - {{ p.goles_visitante }}{% else %}vs{% endif %}</td>
+      <td>{{ p.visitante }}</td>
+      <td>{{ p.complejo }} · {{ p.nombre_cancha }}</td>
+      <td>{{ estado(p.estado) }}</td>
+      <td class="acciones">
+        {% if p.estado in ('programado', 'jugado') %}<a href="{{ url_for('planillas.detalle', id_partido=p.id_partido) }}">Planilla</a>{% endif %}
+        {% if p.estado in ('programado', 'postergado') %}
+          <a href="{{ url_for('partidos.editar', id_partido=p.id_partido) }}">{{ 'Reprogramar' if p.estado == 'postergado' else 'Editar' }}</a>
+          {% if p.en_planilla == 0 %}
+            {% if p.estado == 'programado' %}{{ boton_post(url_for('partidos.cambiar_estado', id_partido=p.id_partido), 'Postergar', 'secundario', '¿Postergar el partido?', {'estado': 'postergado'}) }}{% endif %}
+            {{ boton_post(url_for('partidos.cambiar_estado', id_partido=p.id_partido), 'Cancelar', 'secundario', '¿Cancelar el partido? Los equipos podrán volver a enfrentarse en otro partido.', {'estado': 'cancelado'}) }}
+            {{ boton_post(url_for('partidos.eliminar', id_partido=p.id_partido), 'Eliminar', 'peligro', '¿Eliminar el partido?') }}
+          {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="8" class="vacio">No hay partidos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

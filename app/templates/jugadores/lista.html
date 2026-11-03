@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post %}
+{% block titulo %}Jugadores{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Jugadores <small>({{ filas|length }})</small></h1>
+  <a class="boton primario" href="{{ url_for('jugadores.nuevo') }}">+ Nuevo jugador</a>
+</div>
+<form method="get" class="filtros">
+  <input name="q" value="{{ filtro.q }}" placeholder="Buscar por CI, nombre o email" maxlength="60">
+  <select name="facultad"><option value="">Todas las facultades</option>
+    {% for f in facultades %}<option value="{{ f.id_facultad }}" {% if f.id_facultad == filtro.facultad %}selected{% endif %}>{{ f.nombre }}</option>{% endfor %}
+  </select>
+  <select name="tipo"><option value="">Todos los tipos</option>
+    {% for t in tipos %}<option value="{{ t }}" {% if t == filtro.tipo %}selected{% endif %}>{{ t|etiqueta }}</option>{% endfor %}
+  </select>
+  <button class="secundario">Filtrar</button>
+</form>
+<table>
+  <thead><tr><th>CI</th><th>Apellido, nombre</th><th>Email</th><th>Nacimiento</th><th>Facultad</th><th>Tipo</th><th></th></tr></thead>
+  <tbody>
+  {% for j in filas %}
+    <tr>
+      <td>{{ j.ci }}</td><td>{{ j.apellido }}, {{ j.nombre }}</td><td>{{ j.email }}</td>
+      <td>{{ j.fecha_nacimiento|fecha }}</td><td>{{ j.facultad }}</td><td>{{ j.tipo|etiqueta }}</td>
+      <td class="acciones">
+        <a href="{{ url_for('jugadores.editar', ci=j.ci) }}">Editar</a>
+        {% if j.planteles == 0 %}
+          {{ boton_post(url_for('jugadores.eliminar', ci=j.ci), 'Eliminar', 'peligro', '¿Eliminar a ' ~ j.nombre ~ ' ' ~ j.apellido ~ '?') }}
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="7" class="vacio">No se encontraron jugadores.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

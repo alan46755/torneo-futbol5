@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, selector, csrf %}
+{% block titulo %}{{ 'Programar partido' if nuevo else 'Editar partido' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Programar partido' if nuevo else 'Editar partido' }} <small>· {{ torneo.nombre }}</small></h1>
+<form method="post" class="tarjeta formulario" data-partido>
+  {{ csrf() }}
+  {{ campo('numero_fecha', 'Número de fecha', p, 'number', 'required min="1" max="50"') }}
+  <div class="fila">
+    <label class="campo"><span>Equipo local</span>
+      <select name="id_equipo_local" id="id_equipo_local" required>
+        <option value="">Seleccione...</option>
+        {% for e in equipos %}<option value="{{ e.id_equipo }}" {% if e.id_equipo|string == (p.id_equipo_local|string) %}selected{% endif %} {% if e.jugadores < 5 %}disabled{% endif %}>{{ e.nombre }}{% if e.jugadores < 5 %} (plantel incompleto){% endif %}</option>{% endfor %}
+      </select></label>
+    <label class="campo"><span>Equipo visitante</span>
+      <select name="id_equipo_visitante" id="id_equipo_visitante" required>
+        <option value="">Seleccione...</option>
+        {% for e in equipos %}<option value="{{ e.id_equipo }}" {% if e.id_equipo|string == (p.id_equipo_visitante|string) %}selected{% endif %} {% if e.jugadores < 5 %}disabled{% endif %}>{{ e.nombre }}{% if e.jugadores < 5 %} (plantel incompleto){% endif %}</option>{% endfor %}
+      </select></label>
+  </div>
+  <div class="fila">
+    {{ campo('dia', 'Día', p, 'date', 'required min="' ~ ([torneo.fecha_inicio, hoy()]|max if nuevo else torneo.fecha_inicio) ~ '" max="' ~ torneo.fecha_fin ~ '"') }}
+    <label class="campo"><span>Turno</span>
+      <select name="id_turno" required>
+        <option value="">Seleccione...</option>
+        {% for t in turnos %}<option value="{{ t.id_turno }}" {% if t.id_turno|string == (p.id_turno|string) %}selected{% endif %}>{{ t.hora_inicio|hora }} a {{ t.hora_fin|hora }}</option>{% endfor %}
+      </select></label>
+  </div>
+  <label class="campo"><span>Cancha</span>
+    <select name="cancha" required>
+      <option value="">Seleccione...</option>
+      {% for c in canchas %}{% set v = c.id_complejo ~ '|' ~ c.nombre_cancha %}
+        <option value="{{ v }}" {% if v == p.cancha %}selected{% endif %}>{{ c.complejo }} · {{ c.nombre_cancha }} ({{ c.superficie|etiqueta }}{{ ', techada' if c.techada }})</option>
+      {% endfor %}
+    </select></label>
+  {% if not nuevo %}
+    <label class="campo"><span>Estado</span>
+      <select name="estado" required>
+        {% for e in ['programado', 'postergado', 'cancelado'] %}<option value="{{ e }}" {% if e == p.estado %}selected{% endif %}>{{ e|etiqueta }}</option>{% endfor %}
+      </select>
+      <small>Para reprogramar un partido postergado, elija el nuevo día/turno y vuelva a "Programado". Para marcarlo jugado use la planilla.</small>
+    </label>
+  {% endif %}
+  <p class="nota">El sistema controla: mismos equipos de la edición con al menos 5 jugadores, que no se repita un cruce,
+    que ningún equipo juegue dos veces en la misma fecha y que la cancha esté libre en ese día y turno.</p>
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('partidos.lista') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

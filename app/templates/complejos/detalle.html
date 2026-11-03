@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post, csrf %}
+{% block titulo %}{{ c.nombre }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>{{ c.nombre }}</h1>
+  <div>
+    <a class="boton secundario" href="{{ url_for('complejos.editar', id_complejo=c.id_complejo) }}">Editar complejo</a>
+    {{ boton_post(url_for('complejos.eliminar', id_complejo=c.id_complejo), 'Eliminar complejo', 'peligro', '¿Eliminar el complejo y todas sus canchas?') }}
+  </div>
+</div>
+<p class="sub">{{ c.direccion }} · {{ c.departamento }}</p>
+
+<section class="tarjeta">
+  <h2>Canchas</h2>
+  <table>
+    <thead><tr><th>Nombre</th><th>Superficie</th><th>Techada</th><th>Partidos</th><th></th></tr></thead>
+    <tbody>
+    {% for ca in canchas %}
+      <tr>
+        <td colspan="3">
+          <form method="post" action="{{ url_for('complejos.editar_cancha', id_complejo=c.id_complejo, nombre=ca.nombre_cancha) }}" class="en-linea fila">
+            {{ csrf() }}
+            <input name="nombre_cancha" value="{{ ca.nombre_cancha }}" required maxlength="40" class="ancho-medio">
+            <select name="superficie" required>
+              {% for s in ['sintetico', 'parquet'] %}<option value="{{ s }}" {% if s == ca.superficie %}selected{% endif %}>{{ s|etiqueta }}</option>{% endfor %}
+            </select>
+            <label class="check"><input type="checkbox" name="techada" value="1" {% if ca.techada %}checked{% endif %}> Techada</label>
+            <button class="secundario">Guardar</button>
+          </form>
+        </td>
+        <td>{{ ca.partidos }}</td>
+        <td class="acciones">{% if ca.partidos == 0 %}{{ boton_post(url_for('complejos.eliminar_cancha', id_complejo=c.id_complejo, nombre=ca.nombre_cancha), 'Eliminar', 'peligro', '¿Eliminar la cancha?') }}{% endif %}</td>
+      </tr>
+    {% else %}<tr><td colspan="5" class="vacio">El complejo no tiene canchas.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <h3>Agregar cancha</h3>
+  <form method="post" action="{{ url_for('complejos.agregar_cancha', id_complejo=c.id_complejo) }}" class="formulario fila">
+    {{ csrf() }}
+    <label class="campo"><span>Nombre</span><input name="nombre_cancha" required maxlength="40"></label>
+    <label class="campo"><span>Superficie</span>
+      <select name="superficie" required><option value="sintetico">Sintético</option><option value="parquet">Parquet</option></select></label>
+    <label class="check"><input type="checkbox" name="techada" value="1"> Techada</label>
+    <button class="primario">Agregar</button>
+  </form>
+</section>
+<p><a href="{{ url_for('complejos.lista') }}">← Volver a complejos</a></p>
+{% endblock %}

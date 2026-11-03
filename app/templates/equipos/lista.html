@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Equipos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Equipos {% if torneo %}<small>· {{ torneo.nombre }}</small>{% endif %}</h1>
+  {% if torneo and torneo.estado == 'inscripcion' %}
+    <a class="boton primario" href="{{ url_for('equipos.nuevo') }}">+ Nuevo equipo</a>
+  {% endif %}
+</div>
+{% if torneo and torneo.estado != 'inscripcion' %}
+  <p class="nota">El torneo está {{ torneo.estado|etiqueta|lower }}: los equipos y planteles ya no pueden modificarse (solo el capitán y el nombre).</p>
+{% endif %}
+<table>
+  <thead><tr><th>Equipo</th><th>Facultad</th><th>Capitán</th><th>Plantel</th><th>Doc./Func.</th><th></th></tr></thead>
+  <tbody>
+  {% for e in filas %}
+    <tr>
+      <td><a href="{{ url_for('equipos.detalle', id_equipo=e.id_equipo) }}"><b>{{ e.nombre }}</b></a></td>
+      <td>{{ e.facultad }}</td>
+      <td>{{ e.capitan or '—' }}</td>
+      <td class="{{ 'alerta' if e.jugadores < 5 else '' }}">{{ e.jugadores }} / 10</td>
+      <td>{{ e.doc_func or 0 }} / 2</td>
+      <td class="acciones"><a href="{{ url_for('equipos.detalle', id_equipo=e.id_equipo) }}">Plantel</a>
+        <a href="{{ url_for('equipos.editar', id_equipo=e.id_equipo) }}">Editar</a></td>
+    </tr>
+  {% else %}<tr><td colspan="6" class="vacio">No hay equipos en esta edición.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

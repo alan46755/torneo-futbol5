@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post, estado %}
+{% block titulo %}Torneos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Ediciones del torneo</h1>
+  <a class="boton primario" href="{{ url_for('torneos.nuevo') }}">+ Nueva edición</a>
+</div>
+<p class="sub">Cada edición pasa por: Inscripción → En curso → Finalizado. Los planteles solo pueden modificarse en inscripción.</p>
+<table>
+  <thead><tr><th>Edición</th><th>Nombre</th><th>Desde</th><th>Hasta</th><th>Equipos</th><th>Partidos</th><th>Etapa</th><th></th></tr></thead>
+  <tbody>
+  {% for t in filas %}
+    <tr>
+      <td>{{ t.anio }}/{{ t.semestre }}</td><td>{{ t.nombre }}</td>
+      <td>{{ t.fecha_inicio|fecha }}</td><td>{{ t.fecha_fin|fecha }}</td>
+      <td>{{ t.equipos }}</td><td>{{ t.partidos }}</td><td>{{ estado(t.estado) }}</td>
+      <td class="acciones">
+        <a href="{{ url_for('torneos.editar', id_torneo=t.id_torneo) }}">Editar</a>
+        {% if siguiente[t.estado] %}
+          {{ boton_post(url_for('torneos.avanzar', id_torneo=t.id_torneo), 'Pasar a ' ~ (siguiente[t.estado]|etiqueta), 'secundario',
+                        '¿Pasar el torneo a la etapa ' ~ (siguiente[t.estado]|etiqueta) ~ '? No se puede volver atrás.') }}
+        {% endif %}
+        {% if t.equipos == 0 %}
+          {{ boton_post(url_for('torneos.eliminar', id_torneo=t.id_torneo), 'Eliminar', 'peligro', '¿Eliminar esta edición?') }}
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="8" class="vacio">No hay torneos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

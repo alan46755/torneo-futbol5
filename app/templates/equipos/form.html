@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, selector, csrf %}
+{% block titulo %}{{ 'Nuevo equipo' if nuevo else 'Editar equipo' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nuevo equipo' if nuevo else 'Editar equipo' }} <small>· {{ torneo.nombre }}</small></h1>
+<form method="post" class="tarjeta formulario">
+  {{ csrf() }}
+  {{ campo('nombre', 'Nombre del equipo', e, attrs='required minlength="2" maxlength="60"') }}
+  {{ selector('id_facultad', 'Facultad que representa', facultades, e, 'id_facultad', 'nombre', 'required') }}
+  {% if not nuevo %}
+    <label class="campo"><span>Capitán</span>
+      <select name="ci_capitan">
+        <option value="">— Sin capitán —</option>
+        {% for j in plantel %}<option value="{{ j.ci }}" {% if j.ci == e.ci_capitan %}selected{% endif %}>{{ j.apellido }}, {{ j.nombre }}</option>{% endfor %}
+      </select>
+      <small>Debe ser un jugador del plantel. Obligatorio para que el torneo pase a "En curso".</small>
+    </label>
+  {% else %}
+    <p class="nota">Después de crear el equipo podrá cargar su plantel (5 a 10 jugadores de la facultad) y elegir el capitán.</p>
+  {% endif %}
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('equipos.lista') if nuevo else url_for('equipos.detalle', id_equipo=e.id_equipo) }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

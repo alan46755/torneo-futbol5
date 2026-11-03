@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post, csrf %}
+{% block titulo %}Facultades{% endblock %}
+{% block contenido %}
+<h1>Facultades</h1>
+<form method="post" class="tarjeta formulario fila">
+  {{ csrf() }}
+  <label class="campo"><span>Nueva facultad</span>
+    <input name="nombre" required minlength="3" maxlength="100" placeholder="Facultad de ..."></label>
+  <button class="primario">Agregar</button>
+</form>
+<table>
+  <thead><tr><th>Nombre</th><th>Jugadores</th><th>Equipos</th><th></th></tr></thead>
+  <tbody>
+  {% for f in filas %}
+    <tr>
+      <td>
+        <form method="post" action="{{ url_for('facultades.editar', id_facultad=f.id_facultad) }}" class="en-linea">
+          {{ csrf() }}
+          <input name="nombre" value="{{ f.nombre }}" required minlength="3" maxlength="100" class="ancho-medio">
+          <button class="secundario">Guardar</button>
+        </form>
+      </td>
+      <td>{{ f.jugadores }}</td><td>{{ f.equipos }}</td>
+      <td class="acciones">
+        {% if f.jugadores == 0 and f.equipos == 0 %}
+          {{ boton_post(url_for('facultades.eliminar', id_facultad=f.id_facultad), 'Eliminar', 'peligro', '¿Eliminar la facultad?') }}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

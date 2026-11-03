@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Torneo Interfacultades{% endblock %} · Fútbol 5 UCU</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+{% if session.usuario %}
+<header class="barra">
+  <a class="marca" href="{{ url_for('inicio') }}">⚽ Fútbol 5 <small>Interfacultades UCU</small></a>
+  <nav>
+    {% if session.rol == 'administrador' %}
+      <a href="{{ url_for('torneos.lista') }}">Torneos</a>
+      <a href="{{ url_for('equipos.lista') }}">Equipos</a>
+      <a href="{{ url_for('jugadores.lista') }}">Jugadores</a>
+      <a href="{{ url_for('partidos.lista') }}">Partidos</a>
+      <a href="{{ url_for('planillas.lista') }}">Planillas</a>
+      <a href="{{ url_for('sanciones.lista') }}">Sanciones</a>
+      <a href="{{ url_for('complejos.lista') }}">Complejos</a>
+      <a href="{{ url_for('facultades.lista') }}">Facultades</a>
+      <a href="{{ url_for('reportes.index') }}">Reportes</a>
+    {% else %}
+      <a href="{{ url_for('planillas.lista') }}">Planillas</a>
+    {% endif %}
+  </nav>
+  <div class="usuario">
+    {% if lista_torneos %}
+    <form method="get" class="selector-torneo">
+      <select name="torneo" onchange="this.form.submit()" aria-label="Edición del torneo">
+        {% for t in lista_torneos %}
+          <option value="{{ t.id_torneo }}" {% if t.id_torneo == session.torneo %}selected{% endif %}>{{ t.anio }}/{{ t.semestre }} · {{ t.estado|etiqueta }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% endif %}
+    <span title="{{ session.rol|etiqueta }}">{{ session.usuario }}</span>
+    <form method="post" action="{{ url_for('auth.logout') }}" class="en-linea">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="enlace">Salir</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+<main class="contenido">
+  {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in mensajes %}<div class="aviso aviso-{{ cat }}">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block contenido %}{% endblock %}
+</main>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

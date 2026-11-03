@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar{% endblock %}
+{% block contenido %}
+<div class="login">
+  <h1>⚽ Torneo Interfacultades de Fútbol 5</h1>
+  <p class="sub">Universidad Católica del Uruguay</p>
+  <form method="post" class="tarjeta">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="campo"><span>Correo</span>
+      <input type="email" name="correo" value="{{ correo or '' }}" required maxlength="100" autofocus autocomplete="username">
+    </label>
+    <label class="campo"><span>Contraseña</span>
+      <input type="password" name="contrasena" required maxlength="100" autocomplete="current-password">
+    </label>
+    <button type="submit" class="primario ancho">Ingresar</button>
+  </form>
+</div>
+{% endblock %}

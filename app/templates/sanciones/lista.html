@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post %}
+{% block titulo %}Sanciones{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Sanciones {% if torneo %}<small>· {{ torneo.nombre }}</small>{% endif %}</h1>
+  {% if torneo %}<a class="boton primario" href="{{ url_for('sanciones.nueva') }}">+ Sanción disciplinaria</a>{% endif %}
+</div>
+<p class="sub">Las sanciones por tarjeta roja y por acumulación de 3 amarillas se generan automáticamente al registrar las tarjetas
+  (1 fecha, en la fecha siguiente). Si se elimina la tarjeta, la sanción se elimina o recalcula.</p>
+<form method="get" class="filtros">
+  <select name="motivo"><option value="">Todos los motivos</option>
+    {% for m in ['roja', 'acumulacion_amarillas', 'disciplinaria'] %}<option value="{{ m }}" {% if m == motivo %}selected{% endif %}>{{ m|etiqueta }}</option>{% endfor %}
+  </select>
+  <button class="secundario">Filtrar</button>
+</form>
+<table>
+  <thead><tr><th>Jugador</th><th>Equipo</th><th>Motivo</th><th>Fechas</th><th>Detalle</th><th>Origen</th><th></th></tr></thead>
+  <tbody>
+  {% for s in filas %}
+    <tr>
+      <td>{{ s.apellido }}, {{ s.nombre }}</td><td>{{ s.equipo }}</td><td>{{ s.motivo|etiqueta }}</td>
+      <td>{% if s.cantidad_fechas == 1 %}Fecha {{ s.numero_fecha_inicio }}{% else %}Fechas {{ s.numero_fecha_inicio }} a {{ s.numero_fecha_fin }}{% endif %}</td>
+      <td>{{ s.observaciones or '' }}</td>
+      <td>{{ 'Automática' if s.id_tarjeta else 'Manual' }}</td>
+      <td class="acciones">
+        {% if s.motivo == 'disciplinaria' %}
+          <a href="{{ url_for('sanciones.editar', id_sancion=s.id_sancion) }}">Editar</a>
+          {{ boton_post(url_for('sanciones.eliminar', id_sancion=s.id_sancion), 'Eliminar', 'peligro', '¿Eliminar la sanción?') }}
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="7" class="vacio">No hay sanciones.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, selector, csrf %}
+{% block titulo %}{{ 'Nueva edición' if nuevo else 'Editar edición' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nueva edición del torneo' if nuevo else 'Editar edición' }}</h1>
+<form method="post" class="tarjeta formulario">
+  {{ csrf() }}
+  {{ campo('nombre', 'Nombre', t, attrs='required minlength="3" maxlength="100"') }}
+  <div class="fila">
+    {{ campo('anio', 'Año', t, 'number', 'required min="2000" max="2100"') }}
+    {{ selector('semestre', 'Semestre', [1, 2], t, attrs='required') }}
+  </div>
+  <div class="fila">
+    {{ campo('fecha_inicio', 'Fecha de inicio', t, 'date', 'required data-antes-de="fecha_fin"') }}
+    {{ campo('fecha_fin', 'Fecha de fin', t, 'date', 'required') }}
+  </div>
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('torneos.lista') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

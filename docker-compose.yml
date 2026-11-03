@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: tf5-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root.Tf5.2026}
+      TZ: America/Montevideo
+    command:
+      - --default-time-zone=-03:00
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    ports:
+      - "3307:3306"            # en el host: puerto 3307 (no choca con un MySQL local)
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d:ro   # se ejecutan 01, 02 y 03 al crear el volumen
+      - tf5_datos:/var/lib/mysql
+    healthcheck:
+      # Pasa recién cuando los scripts terminaron (existe el usuario tf5_auth y la tabla login).
+      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u tf5_auth -pAuth.Tf5.2026 -e 'SELECT 1 FROM torneo_futbol5.login LIMIT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 20s
+
+  app:
+    build: ./app
+    container_name: tf5-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: torneo_futbol5
+      DB_TIME_ZONE: "-03:00"
+      DB_AUTH_USER: tf5_auth
+      DB_AUTH_PASSWORD: Auth.Tf5.2026
+      DB_ADMIN_USER: tf5_admin
+      DB_ADMIN_PASSWORD: Admin.Tf5.2026
+      DB_PLANILLERO_USER: tf5_planillero
+      DB_PLANILLERO_PASSWORD: Planillero.Tf5.2026
+      SECRET_KEY: ${SECRET_KEY:-cambiar-esta-clave-en-produccion}
+      TZ: America/Montevideo
+    ports:
+      - "8000:5000"            # abrir http://localhost:8000
+
+volumes:
+  tf5_datos:

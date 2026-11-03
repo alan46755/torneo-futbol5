@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, selector, csrf %}
+{% block titulo %}{{ 'Nuevo complejo' if nuevo else 'Editar complejo' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nuevo complejo' if nuevo else 'Editar complejo' }}</h1>
+<form method="post" class="tarjeta formulario">
+  {{ csrf() }}
+  {{ campo('nombre', 'Nombre', c, attrs='required minlength="3" maxlength="80"') }}
+  {{ campo('direccion', 'Dirección', c, attrs='required minlength="5" maxlength="150"') }}
+  {{ selector('departamento', 'Departamento', departamentos, c, attrs='required') }}
+  <div class="botones">
+    <button class="primario">Guardar</button>
+    <a href="{{ url_for('complejos.lista') if nuevo else url_for('complejos.detalle', id_complejo=c.id_complejo) }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Complejos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Complejos deportivos</h1>
+  <a class="boton primario" href="{{ url_for('complejos.nuevo') }}">+ Nuevo complejo</a>
+</div>
+<table>
+  <thead><tr><th>Nombre</th><th>Dirección</th><th>Departamento</th><th>Canchas</th><th></th></tr></thead>
+  <tbody>
+  {% for c in filas %}
+    <tr><td><a href="{{ url_for('complejos.detalle', id_complejo=c.id_complejo) }}"><b>{{ c.nombre }}</b></a></td>
+        <td>{{ c.direccion }}</td><td>{{ c.departamento }}</td><td>{{ c.canchas }}</td>
+        <td class="acciones"><a href="{{ url_for('complejos.detalle', id_complejo=c.id_complejo) }}">Canchas</a>
+          <a href="{{ url_for('complejos.editar', id_complejo=c.id_complejo) }}">Editar</a></td></tr>
+  {% else %}<tr><td colspan="5" class="vacio">No hay complejos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

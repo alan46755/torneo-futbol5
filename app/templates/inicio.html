@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block contenido %}
+{% if not torneo %}
+  <div class="tarjeta"><h1>No hay torneos cargados</h1>
+    <p><a class="boton primario" href="{{ url_for('torneos.nuevo') }}">Crear la primera edición</a></p></div>
+{% else %}
+<h1>{{ torneo.nombre }}</h1>
+<p class="sub">Etapa: <span class="estado estado-{{ torneo.estado }}">{{ torneo.estado|etiqueta }}</span>
+  · del {{ torneo.fecha_inicio|fecha }} al {{ torneo.fecha_fin|fecha }}</p>
+
+<div class="kpis">
+  <div class="kpi"><b>{{ resumen.equipos }}</b><span>Equipos</span></div>
+  <div class="kpi"><b>{{ resumen.jugadores }}</b><span>Jugadores inscriptos</span></div>
+  <div class="kpi"><b>{{ resumen.jugados }}</b><span>Partidos jugados</span></div>
+  <div class="kpi"><b>{{ resumen.programados }}</b><span>Partidos programados</span></div>
+  <div class="kpi"><b>{{ resumen.sanciones }}</b><span>Sanciones</span></div>
+</div>
+
+<div class="dos-columnas">
+  <section class="tarjeta">
+    <h2>Posiciones (top 5)</h2>
+    <table>
+      <thead><tr><th>Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
+      <tbody>
+      {% for r in tabla %}<tr><td>{{ r.equipo }}</td><td>{{ r.pj }}</td><td>{{ r.dg }}</td><td><b>{{ r.pts }}</b></td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <p><a href="{{ url_for('reportes.index') }}#posiciones">Ver tabla completa y reportes →</a></p>
+  </section>
+  <section class="tarjeta">
+    <h2>Próximos partidos</h2>
+    {% if proximos %}
+    <table>
+      <thead><tr><th>Fecha</th><th>Día</th><th>Partido</th><th>Cancha</th></tr></thead>
+      <tbody>
+      {% for p in proximos %}
+        <tr><td>{{ p.numero_fecha }}</td><td>{{ p.dia|fecha }} {{ p.hora_inicio|hora }}</td>
+            <td>{{ p.local }} vs {{ p.visitante }}</td><td>{{ p.complejo }} · {{ p.nombre_cancha }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="vacio">No hay partidos programados.</p>{% endif %}
+  </section>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import boton_post, csrf, estado %}
+{% block titulo %}{{ e.nombre }}{% endblock %}
+{% block contenido %}
+{% set editable = e.estado_torneo == 'inscripcion' %}
+<div class="encabezado">
+  <h1>{{ e.nombre }} <small>· {{ e.facultad }}</small></h1>
+  <div>
+    <a class="boton secundario" href="{{ url_for('equipos.editar', id_equipo=e.id_equipo) }}">Editar equipo</a>
+    {% if editable %}
+      {{ boton_post(url_for('equipos.eliminar', id_equipo=e.id_equipo), 'Eliminar equipo', 'peligro', '¿Eliminar el equipo y su plantel?') }}
+    {% endif %}
+  </div>
+</div>
+<p class="sub">{{ e.torneo }} · {{ estado(e.estado_torneo) }} · Capitán: <b>{{ e.capitan or 'sin asignar' }}</b></p>
+
+<section class="tarjeta">
+  <h2>Plantel ({{ plantel|length }}/10)</h2>
+  {% if plantel|length < 5 %}<p class="aviso aviso-error">El plantel necesita al menos 5 jugadores para poder programar partidos.</p>{% endif %}
+  <table>
+    <thead><tr><th>#</th><th>Jugador</th><th>CI</th><th>Tipo</th><th>Partidos jugados</th><th></th></tr></thead>
+    <tbody>
+    {% for j in plantel %}
+      <tr>
+        <td>
+          {% if editable %}
+          <form method="post" action="{{ url_for('equipos.cambiar_camiseta', id_equipo=e.id_equipo, ci=j.ci) }}" class="en-linea">
+            {{ csrf() }}<input type="number" name="numero_camiseta" value="{{ j.numero_camiseta }}" min="1" max="99" required class="numero">
+            <button class="enlace" title="Guardar número">✓</button>
+          </form>
+          {% else %}{{ j.numero_camiseta }}{% endif %}
+        </td>
+        <td>{{ j.apellido }}, {{ j.nombre }} {% if j.ci == e.ci_capitan %}<span class="insignia">C</span>{% endif %}</td>
+        <td>{{ j.ci }}</td><td>{{ j.tipo|etiqueta }}</td><td>{{ j.partidos }}</td>
+        <td class="acciones">
+          {% if j.ci != e.ci_capitan %}
+            {{ boton_post(url_for('equipos.asignar_capitan', id_equipo=e.id_equipo, ci=j.ci), 'Hacer capitán', 'secundario') }}
+            {% if editable %}{{ boton_post(url_for('equipos.quitar_jugador', id_equipo=e.id_equipo, ci=j.ci), 'Quitar', 'peligro', '¿Quitar al jugador del plantel?') }}{% endif %}
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}<tr><td colspan="6" class="vacio">El plantel está vacío.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% if editable and plantel|length < 10 %}
+<section class="tarjeta">
+  <h2>Agregar jugador</h2>
+  {% if candidatos %}
+  <form method="post" action="{{ url_for('equipos.agregar_jugador', id_equipo=e.id_equipo) }}" class="formulario fila">
+    {{ csrf() }}
+    <label class="campo"><span>Jugador de {{ e.facultad }} sin equipo en esta edición</span>
+      <select name="ci_jugador" required>
+        <option value="">Seleccione...</option>
+        {% for c in candidatos %}<option value="{{ c.ci }}">{{ c.apellido }}, {{ c.nombre }} ({{ c.tipo|etiqueta }})</option>{% endfor %}
+      </select>
+    </label>
+    <label class="campo"><span>N° camiseta</span><input type="number" name="numero_camiseta" min="1" max="99" required class="numero"></label>
+    <button class="primario">Agregar</button>
+  </form>
+  {% else %}
+    <p class="vacio">No hay jugadores disponibles de esta facultad. <a href="{{ url_for('jugadores.nuevo') }}">Registrar jugador</a></p>
+  {% endif %}
+</section>
+{% endif %}
+<p><a href="{{ url_for('equipos.lista') }}">← Volver a equipos</a></p>
+{% endblock %}

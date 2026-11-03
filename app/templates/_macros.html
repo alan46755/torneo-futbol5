@@ -1,0 +1,35 @@
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro val(obj, campo) %}{% if obj and obj[campo] is not none %}{{ obj[campo] }}{% endif %}{% endmacro %}
+
+{% macro campo(nombre, etiqueta, obj=None, tipo="text", attrs="", ayuda=None) %}
+<label class="campo">
+  <span>{{ etiqueta }}</span>
+  <input type="{{ tipo }}" name="{{ nombre }}" id="{{ nombre }}" value="{{ val(obj, nombre) }}" {{ attrs|safe }}>
+  {% if ayuda %}<small>{{ ayuda }}</small>{% endif %}
+</label>
+{% endmacro %}
+
+{% macro selector(nombre, etiqueta, opciones, obj=None, valor_attr=None, texto_attr=None, attrs="", vacio="Seleccione...") %}
+<label class="campo">
+  <span>{{ etiqueta }}</span>
+  <select name="{{ nombre }}" id="{{ nombre }}" {{ attrs|safe }}>
+    {% if vacio %}<option value="">{{ vacio }}</option>{% endif %}
+    {% set actual = val(obj, nombre)|string %}
+    {% for o in opciones %}
+      {% set v = (o[valor_attr] if valor_attr else o)|string %}
+      <option value="{{ v }}" {% if v == actual %}selected{% endif %}>{{ o[texto_attr] if texto_attr else o|etiqueta }}</option>
+    {% endfor %}
+  </select>
+</label>
+{% endmacro %}
+
+{% macro boton_post(url, texto, clase="", confirmar=None, campos={}) %}
+<form method="post" action="{{ url }}" class="en-linea" {% if confirmar %}data-confirmar="{{ confirmar }}"{% endif %}>
+  {{ csrf() }}
+  {% for k, v in campos.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+  <button type="submit" class="{{ clase }}">{{ texto }}</button>
+</form>
+{% endmacro %}
+
+{% macro estado(e) %}<span class="estado estado-{{ e }}">{{ e|etiqueta }}</span>{% endmacro %}
